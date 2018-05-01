@@ -20,17 +20,29 @@ trait ShoppingcartService extends Service {
 
   def showCart(id: String): ServiceCall[NotUsed, List[String]]
 
+  def removeFromCart(id: String): ServiceCall[RemoveFromCartRequest, Done]
+
   override final def descriptor = {
     import Service._
     // @formatter:off
     named("shoppingcart")
       .withCalls(
         restCall(Method.POST,"/api/add-to-cart/:id", addToCart _),
-        restCall(Method.GET,"/api/cart/:id", showCart _)
+        restCall(Method.GET,"/api/cart/:id", showCart _),
+        restCall(Method.POST, "/api/cart/:id", removeFromCart _)
       )
       .withAutoAcl(true)
     // @formatter:on
   }
+
+
+
+}
+
+case class RemoveFromCartRequest(product: String)
+
+object RemoveFromCartRequest {
+  implicit val format: Format[RemoveFromCartRequest] = Json.format[RemoveFromCartRequest]
 }
 
 case class AddToCartRequest(product: String)

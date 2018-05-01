@@ -34,6 +34,13 @@ class ShoppingcartEntity extends PersistentEntity {
         ) { _ =>
           context.reply(Done)
         }
+    }.onCommand[RemoveFromCartCommand, Done] {
+      case (RemoveFromCartCommand(product), context, state) =>
+        context.thenPersist(
+          RemovedFromCartEvent(product)
+        ) { _ =>
+          context.reply(Done)
+        }
     }.onReadOnlyCommand[ShowCartCommand.type, List[String]] {
       case (ShowCartCommand, context, state) =>
         context.reply(state.products)
@@ -79,6 +86,8 @@ object AddedToCartEvent {
   implicit val format: Format[AddedToCartEvent] = Json.format
 }
 
+  case class RemovedFromCartEvent(product: String) extends ShoppingcartEvent
+
   /**
     * This interface defines all the commands that the HelloWorld entity supports.
     */
@@ -93,7 +102,9 @@ object AddedToCartEvent {
 
   }
 
-case object ShowCartCommand extends ShoppingcartCommand[List[String]]
+  case object ShowCartCommand extends ShoppingcartCommand[List[String]]
+
+  case class RemoveFromCartCommand(product: String) extends ShoppingcartCommand[Done]
 
   /**
     * Akka serialization, used by both persistence and remoting, needs to have
